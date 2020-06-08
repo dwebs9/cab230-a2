@@ -8,7 +8,7 @@ const router = express.Router();
 
 // Stocks/Symbols Route
 router.get("/stocks/symbols", function(req,res){
-    var query = "SELECT name, symbol, industry FROM ??";
+    var query = "SELECT DISTINCT name, symbol, industry FROM ??";
     var table = ["stocks"];  
     query = mysql.format(query,table);
       req.db.query(query,function(err,rows){
@@ -16,9 +16,11 @@ router.get("/stocks/symbols", function(req,res){
     res.json({"Error" : true, "Message" : "Error executing MySQL query"});
   } else {
   res.json({"Error" : false, "Message" : "Success", "stocks" : rows});
+   console.log(rows);
   }
   });
   console.log("serving Route: /stocks/symbols")
+ 
 })
 // /stocks/{symbol}
 router.get("/stocks/:id", function(req,res){
