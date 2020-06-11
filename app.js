@@ -3,7 +3,7 @@ var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
-require("dotenv").config();
+// require("dotenv").config();
 const helmet = require('helmet');
 const cors = require('cors');
 const options = require('./knexfile.js');
@@ -14,7 +14,7 @@ yaml = require('yamljs');
 swaggerDocument = yaml.load('./docs/swagger.yaml');  
 
 var indexRouter = require("./routes/index");
-var usersRouter = require("./routes/users");
+var usersRouter = require("./routes/user");
 
 var app = express();
 
@@ -36,7 +36,7 @@ app.use((req, res, next)=>{
 })
 
 app.use("/", indexRouter);
-app.use("/users", usersRouter);
+app.use("/user", usersRouter);
 app.use('/docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument))
 
 // catch 404 and forward to error handler
