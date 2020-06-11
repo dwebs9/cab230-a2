@@ -14,11 +14,16 @@ router.get("/stocks/symbols", function(req,res){
           builder.where('industry','like', req.query.industry);
         }
       }).then(function (rows) {
+        console.log("Error!")
+        console.log(rows == 0)
+        if(rows == 0){
+          res.status(400).json({"Error" : true, "Message" : "Bad Request"})
+          return 
+        }
         res.json(rows);
     })
     .catch((err) => {
-      console.log(err);
-      res.json({"Error" : true, "Message" : "Error executing MySQL query"})
+      res.status(400).json({"Error" : true, "Message" : "Bad Request"})
     })
  
 });
@@ -36,8 +41,35 @@ router.get("/stocks/:id", function(req,res){
 })
 });
 
-// Stocks/Symbols with optional filter by industry
-router.get("/stocks/authed/:id", function(req,res){
+const authorize = (req, res, next ) =>{
+  const authorization = req.headers.authorization
+  let token = null;
+
+
+  // Retrieve token
+  if(authorization && authorization.split(" ").length == 2){
+    token = authroization.split(" ")[1]
+    console.log("Token: ", token)
+
+  }else{
+    console.log("Unauthroized user")
+    return
+  }
+  try{
+    const decode = jwt.verify(token, secretKey)
+
+    if(decoded.exp < Date.now()){
+      console.log("Token has expired")
+      return
+    }
+    next()
+  }catch(e){
+    console.log("Token is not valid: ", err)
+  }
+}
+
+// Authed route and filter by timestamps range
+router.get("/stocks/authed/:id", authorize, function(req,res){
   console.log("Authed route");
   builder = req.db;
   builder.from('stocks').distinct("timestamp","name", "symbol", "industry", "open","high", "low","close","volumes").where("symbol",req.params.id)
@@ -56,14 +88,9 @@ router.get("/stocks/authed/:id", function(req,res){
       res.json({"Error" : true, "Message" : "Error executing MySQL query"});
     })
  
-
-
 });
 
-// // /stocks/authed/{symbol}
-// router.get("/stocks/authed/{symbol}", function(req,res){
-//   console.log("serving Route: /stocks/authed/{symbol}")
-// });
+
 
 
 module.exports = router;
