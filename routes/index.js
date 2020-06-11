@@ -36,7 +36,7 @@ router.get("/stocks/:id", function(req,res){
 })
 });
 
-// Stocks/Symbols with optional filter by industry
+// Authed route and filter by timestamps range
 router.get("/stocks/authed/:id", function(req,res){
   console.log("Authed route");
   builder = req.db;
@@ -56,14 +56,8 @@ router.get("/stocks/authed/:id", function(req,res){
       res.json({"Error" : true, "Message" : "Error executing MySQL query"});
     })
  
-
-
 });
 
-// // /stocks/authed/{symbol}
-// router.get("/stocks/authed/{symbol}", function(req,res){
-//   console.log("serving Route: /stocks/authed/{symbol}")
-// });
 
 
 module.exports = router;
