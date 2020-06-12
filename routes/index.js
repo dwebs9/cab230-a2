@@ -5,6 +5,7 @@ const options = require('../knexfile');
 const knex = require('knex')(options);
 const jwt = require('jsonwebtoken');
 const { BadRequest } = require('http-errors');
+const { query } = require('express');
 const secretKey = "secret key"
 
 function isEmpty(obj) {
@@ -32,7 +33,10 @@ router.get("/stocks/symbols", function(req,res){
         if(typeof req.query.industry !='undefined'){
           console.log("valid query industry is:");
           console.log(req.query.industry);
+
           builder.where('industry','like', '%' + req.query.industry + '%');
+         
+
           return;
 
         }
@@ -43,7 +47,8 @@ router.get("/stocks/symbols", function(req,res){
       }).then(function (rows) {
           console.log("then")
         if(rows == 0){
-          res.status(400).json({"error" : true, "message" : 'Bad Request'})
+          console.log("Not found")
+          res.status(404).json({"error" : true, "message" : 'Not Found'})
           return 
         }
         res.json(rows);
@@ -58,16 +63,23 @@ router.get("/stocks/symbols", function(req,res){
 // Route for returning latest entry of a particular stock
 router.get("/stocks/:id", function(req,res){
   builder = req.db;
+  console.log(req.query);
+  console.log(isEmpty(req.query));
   builder.from('stocks').distinct("timestamp","name", "symbol", "industry", "open","high", "low","close","volumes").where("symbol",req.params.id)
     .then(function (rows) {
+      console.log("then")
       console.log(rows.length);
       if(rows.length==0){
         res.status(404).json({"error" : true, "message" : "No entry for symbol in stocks database"})
       
       }
+      if(!isEmpty(req.query)){
+        res.status(400).json({"Error" : true, "message" : "Bad Request"})
+        return
+      }
   res.json(rows[0]);
     }).catch((err) => {
-
+      console.log("catch")
   res.status(404).json({"Error" : true, "message" : "Error executing MySQL query"})
 })
 });
