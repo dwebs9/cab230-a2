@@ -3,31 +3,54 @@ const mysql = require('mysql');
 const router = express.Router();
 const options = require('../knexfile');
 const knex = require('knex')(options);
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
+const { BadRequest } = require('http-errors');
 const secretKey = "secret key"
 
-
+function isEmpty(obj) {
+  for(var key in obj) {
+      if(obj.hasOwnProperty(key))
+          return false;
+  }
+  return true;
+}
 // Stocks/Symbols with optional filter by industry
 router.get("/stocks/symbols", function(req,res){
   builder = req.db;
    builder.from('stocks').distinct("name", "symbol", "industry")
     .modify(function (builder){
-        if(req.query.industry){
-          builder.where('industry','like', '%' + req.query.industry + '%');
+        console.log("undefined ?");
+        console.log(typeof req.query);
+        // there was no query, proceed to all industries
+        if(isEmpty(req.query)){
+          console.log("noquery");
+      
+          return;
+
         }
+
+        if(typeof req.query.industry !='undefined'){
+          console.log("valid query industry is:");
+          console.log(req.query.industry);
+          builder.where('industry','like', '%' + req.query.industry + '%');
+          return;
+
+        }
+
+        res.status(400).json({"error" : true, "message" : 'Bad Request'})
+        // throw 400;
+
       }).then(function (rows) {
-        /// IF the industr
-        console.log("Error!")
-        console.log(rows == 0)
+          console.log("then")
         if(rows == 0){
-        
           res.status(400).json({"error" : true, "message" : 'Bad Request'})
           return 
         }
         res.json(rows);
     })
     .catch((err) => {
-      res.status(400).json({"error" : true, "message" : "Invalid query parameter: only 'industry' is permitted"})
+      console.log("catch")
+      // res.status(400).json({"error" : true, "message" : "Invalid query parameter: only 'industry' is permitted"})
     })
  
 });
