@@ -6,20 +6,27 @@
 
 var app = require('../app');
 var debug = require('debug')('a-2:server');
-var http = require('http');
+var https = require('https');
+
+const fs  =  require('fs' );  
+const privateKey =  fs .readFileSync('/etc/ssl/private/node-selfsigned.key','utf8'); 
+const certificate =  fs.readFileSync('/etc/ssl/certs/node-selfsigned.crt','utf8');  
+const credentials = { key:  privateKey, cert: certificate}; 
+
+
 
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+var port = normalizePort(process.env.PORT || '443');
 app.set('port', port);
 
 /**
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
+var server = https.createServer(credentials,app);
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -49,9 +56,9 @@ function normalizePort(val) {
   return false;
 }
 
-/**
- * Event listener for HTTP server "error" event.
- */
+// /**
+//  * Event listener for HTTP server "error" event.
+//  */
 
 function onError(error) {
   if (error.syscall !== 'listen') {

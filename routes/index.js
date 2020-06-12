@@ -128,7 +128,12 @@ router.get("/stocks/authed/:id", authorize, function(req,res){
           builder.whereBetween('timestamp', [req.query.from, req.query.to]);
         }
       }).then(function (rows) {
+        if(rows.length == 0){
+          res.status(404).json({"Error" : true, "message" : "Not Found"});
+          returns
+        }
         res.json(rows);
+
     })
     .catch((err) => {
       console.log(err);
