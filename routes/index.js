@@ -3,6 +3,8 @@ const mysql = require('mysql');
 const router = express.Router();
 const options = require('../knexfile');
 const knex = require('knex')(options);
+const jwt = require('jsonwebtoken')
+const secretKey = "secret key"
 
 
 // Stocks/Symbols with optional filter by industry
@@ -11,7 +13,7 @@ router.get("/stocks/symbols", function(req,res){
    builder.from('stocks').distinct("name", "symbol", "industry")
     .modify(function (builder){
         if(req.query.industry){
-          builder.where('industry','like', req.query.industry);
+          builder.where('industry','like', '%' + req.query.industry + '%');
         }
       }).then(function (rows) {
         /// IF the industr
@@ -40,10 +42,10 @@ router.get("/stocks/:id", function(req,res){
         res.status(404).json({"error" : true, "message" : "No entry for symbol in stocks database"})
       
       }
-  res.json(rows[1]);
+  res.json(rows[0]);
     }).catch((err) => {
 
-  res.status(404).json({"Error" : true, "Message" : "Error executing MySQL query"})
+  res.status(404).json({"Error" : true, "message" : "Error executing MySQL query"})
 })
 });
 
@@ -54,7 +56,7 @@ const authorize = (req, res, next ) =>{
 
   // Retrieve token
   if(authorization && authorization.split(" ").length == 2){
-    token = authroization.split(" ")[1]
+    token = authorization.split(" ")[1]
     console.log("Token: ", token)
 
   }else{
@@ -62,14 +64,14 @@ const authorize = (req, res, next ) =>{
     return
   }
   try{
-    const decode = jwt.verify(token, secretKey)
+    const decoded = jwt.verify(token, secretKey)
 
     if(decoded.exp < Date.now()){
       console.log("Token has expired")
       return
     }
     next()
-  }catch(e){
+  }catch(err){
     console.log("Token is not valid: ", err)
   }
 }
@@ -91,7 +93,7 @@ router.get("/stocks/authed/:id", authorize, function(req,res){
     })
     .catch((err) => {
       console.log(err);
-      res.json({"Error" : true, "Message" : "Error executing MySQL query"});
+      res.json({"Error" : true, "message" : "Error executing MySQL query"});
     })
  
 });
