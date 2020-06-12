@@ -14,16 +14,18 @@ router.get("/stocks/symbols", function(req,res){
           builder.where('industry','like', req.query.industry);
         }
       }).then(function (rows) {
+        /// IF the industr
         console.log("Error!")
         console.log(rows == 0)
         if(rows == 0){
-          res.status(400).json({"Error" : true, "Message" : "Bad Request"})
+        
+          res.status(400).json({"error" : true, "message" : 'Bad Request'})
           return 
         }
         res.json(rows);
     })
     .catch((err) => {
-      res.status(400).json({"Error" : true, "Message" : "Bad Request"})
+      res.status(400).json({"error" : true, "message" : "Invalid query parameter: only 'industry' is permitted"})
     })
  
 });
@@ -31,13 +33,17 @@ router.get("/stocks/symbols", function(req,res){
 // Route for returning latest entry of a particular stock
 router.get("/stocks/:id", function(req,res){
   builder = req.db;
-  console.log(req.params.id)
   builder.from('stocks').distinct("timestamp","name", "symbol", "industry", "open","high", "low","close","volumes").where("symbol",req.params.id)
     .then(function (rows) {
-  res.json(rows[0]);
-})    .catch((err) => {
-  console.log(err);
-  res.json({"Error" : true, "Message" : "Error executing MySQL query"})
+      console.log(rows.length);
+      if(rows.length==0){
+        res.status(404).json({"error" : true, "message" : "No entry for symbol in stocks database"})
+      
+      }
+  res.json(rows[1]);
+    }).catch((err) => {
+
+  res.status(404).json({"Error" : true, "Message" : "Error executing MySQL query"})
 })
 });
 
