@@ -95,7 +95,7 @@ const authorize = (req, res, next ) =>{
     console.log("Token: ", token)
 
   }else{
-    console.log("Unauthroized user")
+    res.status(403).json({"Error" : true, "message" : "Forbidden"});
     return
   }
   try{
@@ -107,6 +107,7 @@ const authorize = (req, res, next ) =>{
     }
     next()
   }catch(err){
+    res.status(403).json({"Error" : true, "message" : "Forbidden"});
     console.log("Token is not valid: ", err)
   }
 }
@@ -119,6 +120,9 @@ router.get("/stocks/authed/:id", authorize, function(req,res){
     .modify(function (builder){
       console.log("Ready to modify");
       console.log(req.query);
+        if(!req.query.from || !req.query.to){
+          res.status(400).json({"Error" : true, "message" : "Bad Request"});
+        }
         if(req.query.from){
           console.log(req.query.from);
           builder.whereBetween('timestamp', [req.query.from, req.query.to]);

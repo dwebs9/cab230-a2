@@ -70,7 +70,10 @@ router.post("/login", function(req, res, next){
     queryUsers
       .then((users) => {
         if(users.length == 0){
-          console.log("Users does not exist");
+          res.status(401).json({
+            error: true,
+            message: "Created"
+          })
           return;
         }
 
@@ -80,7 +83,10 @@ router.post("/login", function(req, res, next){
       })
       .then((match) => {
         if(!match){
-          console.log("Passwords do not match");
+          res.status(401).json({
+            error: true,
+            message: "Created"
+          })
           return
         }
         // Create and return JWT token
